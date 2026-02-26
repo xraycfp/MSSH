@@ -1,0 +1,26 @@
+CREATE TABLE KnownHost (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    host TEXT NOT NULL,
+    port INTEGER NOT NULL,
+    key_algorithm TEXT NOT NULL,
+    host_key TEXT NOT NULL,
+    added_at INTEGER NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_known_host_unique ON KnownHost(host, port, key_algorithm);
+
+selectAll:
+SELECT * FROM KnownHost ORDER BY added_at DESC;
+
+selectByHostPort:
+SELECT * FROM KnownHost WHERE host = ? AND port = ?;
+
+insert:
+INSERT OR REPLACE INTO KnownHost (host, port, key_algorithm, host_key, added_at)
+VALUES (?, ?, ?, ?, ?);
+
+deleteByHostPort:
+DELETE FROM KnownHost WHERE host = ? AND port = ?;
+
+deleteById:
+DELETE FROM KnownHost WHERE id = ?;

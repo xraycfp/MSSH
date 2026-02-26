@@ -1,0 +1,29 @@
+CREATE TABLE SshKey (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    public_key TEXT NOT NULL,
+    private_key TEXT NOT NULL,
+    passphrase TEXT,
+    fingerprint TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM SshKey ORDER BY created_at DESC;
+
+selectById:
+SELECT * FROM SshKey WHERE id = ?;
+
+insert:
+INSERT INTO SshKey (name, type, public_key, private_key, passphrase, fingerprint, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE SshKey SET name = ?, passphrase = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM SshKey WHERE id = ?;
+
+lastInsertId:
+SELECT last_insert_rowid();

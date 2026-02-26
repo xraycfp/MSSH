@@ -1,0 +1,35 @@
+CREATE TABLE Host (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    host TEXT NOT NULL,
+    port INTEGER NOT NULL DEFAULT 22,
+    username TEXT NOT NULL,
+    auth_type TEXT NOT NULL DEFAULT 'PASSWORD',
+    password TEXT,
+    key_id INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM Host ORDER BY updated_at DESC;
+
+selectById:
+SELECT * FROM Host WHERE id = ?;
+
+insert:
+INSERT INTO Host (name, host, port, username, auth_type, password, key_id, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE Host SET name = ?, host = ?, port = ?, username = ?, auth_type = ?, password = ?, key_id = ?, updated_at = ?
+WHERE id = ?;
+
+deleteById:
+DELETE FROM Host WHERE id = ?;
+
+lastInsertId:
+SELECT last_insert_rowid();
+
+search:
+SELECT * FROM Host WHERE name LIKE ? OR host LIKE ? OR username LIKE ? ORDER BY updated_at DESC;
