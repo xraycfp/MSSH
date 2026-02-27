@@ -6,16 +6,25 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+private val BarBg = Color(0xFF1A1A2E)
+private val KeyBg = Color(0xFF2A2A40)
+private val KeyBgActive = Color(0xFF4A9EFF)
+private val KeyText = Color(0xFFBBBBCC)
+private val KeyTextActive = Color.White
+private val DividerColor = Color(0xFF333350)
 
 data class ExtraKey(
     val label: String,
@@ -44,59 +53,117 @@ fun ExtraKeysBar(
 
     val scrollState = rememberScrollState()
 
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF2D2D3F))
-            .horizontalScroll(scrollState)
-            .padding(horizontal = 4.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .background(BarBg)
     ) {
-        // Toggle keys
-        ExtraKeyButton(
-            label = "Ctrl",
-            isActive = ctrlActive,
-            onClick = { ctrlActive = !ctrlActive }
-        )
-        ExtraKeyButton(
-            label = "Alt",
-            isActive = altActive,
-            onClick = { altActive = !altActive }
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(scrollState)
+                .padding(horizontal = 6.dp, vertical = 5.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // -- Modifier keys --
+            ExtraKeyButton(
+                label = "Ctrl",
+                isActive = ctrlActive,
+                onClick = { ctrlActive = !ctrlActive }
+            )
+            ExtraKeyButton(
+                label = "Alt",
+                isActive = altActive,
+                onClick = { altActive = !altActive }
+            )
 
-        Spacer(modifier = Modifier.width(4.dp))
+            KeyDivider()
 
-        // Function keys
-        ExtraKeyButton(label = "ESC") { onInput(byteArrayOf(0x1B)) }
-        ExtraKeyButton(label = "ENTER") { onInput(byteArrayOf(0x0D)) }
-        ExtraKeyButton(label = "BS") { onInput(byteArrayOf(0x7F)) }
-        ExtraKeyButton(label = "TAB") { onInput(byteArrayOf(0x09)) }
-        ExtraKeyButton(label = "|") {
-            val bytes = if (ctrlActive) byteArrayOf(0x1C) else "|".toByteArray()
-            onInput(bytes)
-            ctrlActive = false
+            // -- Common special keys --
+            ExtraKeyButton(label = "ESC") { onInput(byteArrayOf(0x1B)) }
+            ExtraKeyButton(label = "TAB") { onInput(byteArrayOf(0x09)) }
+
+            KeyDivider()
+
+            // -- Arrow keys --
+            ExtraKeyButton(label = "\u25C0") { onInput("\u001b[D".toByteArray()) }
+            ExtraKeyButton(label = "\u25B2") { onInput("\u001b[A".toByteArray()) }
+            ExtraKeyButton(label = "\u25BC") { onInput("\u001b[B".toByteArray()) }
+            ExtraKeyButton(label = "\u25B6") { onInput("\u001b[C".toByteArray()) }
+
+            KeyDivider()
+
+            // -- Symbols --
+            ExtraKeyButton(label = "|") {
+                val bytes = if (ctrlActive) byteArrayOf(0x1C) else "|".toByteArray()
+                onInput(bytes)
+                ctrlActive = false
+            }
+            ExtraKeyButton(label = "/") { onInput("/".toByteArray()) }
+            ExtraKeyButton(label = "-") { onInput("-".toByteArray()) }
+            ExtraKeyButton(label = "~") { onInput("~".toByteArray()) }
+            ExtraKeyButton(label = "_") { onInput("_".toByteArray()) }
+            ExtraKeyButton(label = "=") { onInput("=".toByteArray()) }
+
+            KeyDivider()
+
+            // -- Brackets --
+            ExtraKeyButton(label = "{") { onInput("{".toByteArray()) }
+            ExtraKeyButton(label = "}") { onInput("}".toByteArray()) }
+            ExtraKeyButton(label = "[") { onInput("[".toByteArray()) }
+            ExtraKeyButton(label = "]") { onInput("]".toByteArray()) }
+
+            KeyDivider()
+
+            // -- Navigation --
+            ExtraKeyButton(label = "Home") { onInput("\u001b[H".toByteArray()) }
+            ExtraKeyButton(label = "End") { onInput("\u001b[F".toByteArray()) }
+            ExtraKeyButton(label = "PgUp") { onInput("\u001b[5~".toByteArray()) }
+            ExtraKeyButton(label = "PgDn") { onInput("\u001b[6~".toByteArray()) }
         }
-        ExtraKeyButton(label = "/") { onInput("/".toByteArray()) }
-        ExtraKeyButton(label = "-") { onInput("-".toByteArray()) }
-        ExtraKeyButton(label = "~") { onInput("~".toByteArray()) }
 
-        Spacer(modifier = Modifier.width(4.dp))
+        // Left fade edge
+        if (scrollState.value > 0) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .width(16.dp)
+                    .fillMaxHeight()
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(BarBg, Color.Transparent)
+                        )
+                    )
+            )
+        }
 
-        // Arrow keys
-        ExtraKeyButton(label = "▲") { onInput("\u001b[A".toByteArray()) }
-        ExtraKeyButton(label = "▼") { onInput("\u001b[B".toByteArray()) }
-        ExtraKeyButton(label = "◀") { onInput("\u001b[D".toByteArray()) }
-        ExtraKeyButton(label = "▶") { onInput("\u001b[C".toByteArray()) }
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        // Common control sequences
-        ExtraKeyButton(label = "Home") { onInput("\u001b[H".toByteArray()) }
-        ExtraKeyButton(label = "End") { onInput("\u001b[F".toByteArray()) }
-        ExtraKeyButton(label = "PgUp") { onInput("\u001b[5~".toByteArray()) }
-        ExtraKeyButton(label = "PgDn") { onInput("\u001b[6~".toByteArray()) }
+        // Right fade edge
+        if (scrollState.value < scrollState.maxValue) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .width(16.dp)
+                    .fillMaxHeight()
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(Color.Transparent, BarBg)
+                        )
+                    )
+            )
+        }
     }
+}
+
+@Composable
+private fun KeyDivider() {
+    Box(
+        modifier = Modifier
+            .width(1.dp)
+            .height(20.dp)
+            .background(DividerColor)
+    )
+    Spacer(modifier = Modifier.width(3.dp))
 }
 
 @Composable
@@ -105,15 +172,16 @@ private fun ExtraKeyButton(
     isActive: Boolean = false,
     onClick: () -> Unit
 ) {
-    val bgColor = if (isActive) Color(0xFF4A9EFF) else Color(0xFF3D3D52)
-    val textColor = if (isActive) Color.White else Color(0xFFCCCCCC)
+    val bgColor = if (isActive) KeyBgActive else KeyBg
+    val textColor = if (isActive) KeyTextActive else KeyText
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
+            .heightIn(min = 32.dp)
+            .clip(RoundedCornerShape(6.dp))
             .background(bgColor)
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 7.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -121,6 +189,7 @@ private fun ExtraKeyButton(
             color = textColor,
             fontSize = 12.sp,
             fontFamily = FontFamily.Monospace,
+            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1
         )
     }
